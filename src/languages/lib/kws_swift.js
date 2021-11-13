@@ -33,6 +33,10 @@ export const keywords = [
   // will result in additional modes being created to scan for those keywords to
   // avoid conflicts with other rules
   'test',
+  'one',
+  'two',
+  'seven',
+  'eleven',
   'test',
   'test',
   'test',
