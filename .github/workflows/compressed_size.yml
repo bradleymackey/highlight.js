@@ -1,10 +1,17 @@
-name: Compressed Size
+name: CDN Compressed Size
 
 on: [pull_request, push]
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
-      - uses: preactjs/compressed-size-action@v2
+      - name: Compute Compressed Size
+        uses: preactjs/compressed-size-action@v2
+        with:
+          build-script: "build-cdn"
+          compression: "gzip"
+          pattern: "./build/{.,es}/*.js"
