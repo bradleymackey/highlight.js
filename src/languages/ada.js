@@ -42,6 +42,8 @@ export default function(hljs) {
   // Ada doesn't have block comments, only line comments
   const COMMENTS = hljs.COMMENT('--', '$');
 
+  const STUPID = "long";
+
   // variable declarations of the form
   // Foo : Bar := Baz;
   // where only Bar will be highlighted
