@@ -20,12 +20,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Branch from base
-        run: git remote add pr_repo $PR_URL && git fetch pr_repo $PR_REF && git branch pr pr_repo/$PR_REF
-        env:
-          PR_URL: ${{github.event.pull_request.head.repo.clone_url}}
-          PR_REF: ${{github.event.pull_request.head.ref}}
-
       - name: Compute Compressed Size
         uses: preactjs/compressed-size-action@v2
         with:
