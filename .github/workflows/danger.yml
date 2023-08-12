@@ -17,7 +17,7 @@ jobs:
         run: |
           npm ci
           npm run build-cdn
-          mv build base_build
+          mv build build_base
 
       - name: Checkout PR
         uses: actions/checkout@v3
