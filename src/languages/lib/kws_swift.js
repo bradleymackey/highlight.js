@@ -170,7 +170,11 @@ export const numberSignKeywords = [
   '#selector',
   '#sourceLocation',
   '#warn_unqualified_access',
-  '#warning'
+  '#warning',
+  '#stupid',
+  '#spam',
+  '#workinharddude',
+  '#wearesurenot',
 ];
 
 // Global functions in the Standard Library.
