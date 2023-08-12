@@ -1,12 +1,19 @@
 name: Danger
 
+# read-write repo token
+# access to secrets
 on:
-  pull_request:
+  workflow_run:
+    workflows: ["Build for Danger"]
+    types:
+      - completed
 
 jobs:
-  run:
+  upload:
     runs-on: ubuntu-latest
-
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Dump GitHub context
         env:
@@ -14,35 +21,53 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
 
       - name: Checkout Base
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
-          path: base
-          ref: ${{ github.event.pull_request.base.ref }}
+          ref: ${{ github.event.workflow_run.base_ref }}
 
-      - name: Checkout PR
-        uses: actions/checkout@v3
+      - name: Build
+        run: npm ci
+
+      - name: "Download artifact"
+        uses: actions/github-script@v3.1.0
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          path: pr
+          script: |
+            var artifacts = await github.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: ${{github.event.workflow_run.id }},
+            });
+            var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
+              return artifact.name == "builds"
+            })[0];
+            var download = await github.actions.downloadArtifact({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               artifact_id: matchArtifact.id,
+               archive_format: 'zip',
+            });
+            var fs = require('fs');
+            fs.writeFileSync('${{github.workspace}}/builds.zip', Buffer.from(download.data));
 
-      - name: Build CDN (Base)
-        run: |
-          npm ci
-          npm run build-cdn
-        working-directory: ./base
-
-      - name: Build CDN (PR)
-        run: |
-          npm ci
-          npm run build-cdn
-        working-directory: ./pr
-
-      - name: Copy Base
-        run: cp -R ./pr/build ./base/build_pr
+      - run: unzip -d builds builds.zip
 
       - name: Danger
-        run: npx danger ci
+        id: danger
+        run: |
+          echo "markdown=$(npx danger ci -t)" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DANGER_GITHUB_API_TOKEN: $${{ secrets.DANGER_GITHUB_API_TOKEN }}
-        working-directory: ./base
+
+      - name: "Comment on PR"
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            var fs = require('fs');
+            var issue_number = Number(fs.readFileSync('./builds/pull_req_nr'));
+            await github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: ${{ steps.danger.output.markdown }}
+            });

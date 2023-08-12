@@ -1,0 +1,51 @@
+name: Build for Danger
+
+on:
+  pull_request:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Checkout Base
+        uses: actions/checkout@v3
+        with:
+          path: base
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Checkout PR
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pr
+
+      - name: Build CDN (Base)
+        run: |
+          npm ci
+          npm run build-cdn
+        working-directory: ./base
+
+      - name: Build CDN (PR)
+        run: |
+          npm ci
+          npm run build-cdn
+        working-directory: ./pr
+
+      - name: Create Builds Folder
+        run: |
+          mkdir builds
+          mv base/build builds/base
+          mv pr/build builds/pr
+          echo ${{ github.event.number }} > builds/pull_req_nr
+
+      - name: Save Build Arifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: builds
+          path: ./builds
