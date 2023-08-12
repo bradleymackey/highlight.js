@@ -74,8 +74,8 @@ const getBaseBuildSizes = async () => {
   const esFile = await readBaseFile("build/es/highlight.min.js");
   const commonJsFile = await readBaseFile("build/highlight.min.js");
   return {
-    es: gzipSize(esFile),
-    commonjs: gzipSize(commonJsFile),
+    es: await gzipSize(esFile),
+    commonjs: await gzipSize(commonJsFile),
   };
 };
 
@@ -85,8 +85,8 @@ const getPRBuildSizes = async () => {
   const esFile = await readBaseFile("build/es/highlight.min.js");
   const commonJsFile = await readBaseFile("build/highlight.min.js");
   return {
-    es: gzipSize(esFile),
-    commonjs: gzipSize(commonJsFile),
+    es: await gzipSize(esFile),
+    commonjs: await gzipSize(commonJsFile),
   };
 };
 
