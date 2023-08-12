@@ -8,11 +8,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Debug
+        run:
+          echo "github.event.pull_request.base.ref ${{ github.event.pull_request.base.ref }}"
+          echo "github.base_ref ${{ github.base_ref }}"
+          echo "github.ref ${{ github.ref }}"
+
       - name: Checkout Base
         uses: actions/checkout@v3
         with:
           path: base
-          ref: ${{ github.base_ref }}
+          ref: ${{ github.event.pull_request.base.ref }}
 
       - name: Checkout PR
         uses: actions/checkout@v3
