@@ -27,7 +27,11 @@
 
 const { markdown } = require("danger");
 const fs = require("fs").promises;
+const { join } = require("path");
 const gzipSize = require("gzip-size");
+
+const PR_BUILD_DIR = "build";
+const BASE_BUILD_DIR = "build_base";
 
 /**
  * Returns the contents of a text file in the base of the PR.
@@ -56,29 +60,39 @@ const formatBytes = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-const buildAndComputeSize = async (folder) => {
-  const esFile = await readBaseFile(`${folder}/es/highlight.min.js`);
-  const commonJsFile = await readBaseFile(`${folder}/highlight.min.js`);
-  return {
-    es: await gzipSize(esFile),
-    commonjs: await gzipSize(commonJsFile),
-  };
+const fileSize = async (file) => {
+  const fileContents = await readBaseFile(file);
+  return await gzipSize(fileContents);
+};
+
+const baseFile = (file) => {
+  return join(BASE_BUILD_DIR, file);
+};
+
+/**
+ * A file from the build directory of the PR.
+ */
+const prFile = (file) => {
+  return join(PR_BUILD_DIR, file);
 };
 
 const run = async () => {
-  const base = await buildAndComputeSize("build_base");
-  const pr = await buildAndComputeSize("build");
+  const baseCommonjs = await fileSize(baseFile("highlight.min.js"));
+  const baseEs = await fileSize(baseFile("es/highlight.min.js"));
+  const prCommonjs = await fileSize(prFile("highlight.min.js"));
+  const prEs = await fileSize(prFile("es/highlight.min.js"));
 
-  if (base.commonjs === pr.commonjs && base.es === pr.es) {
-    markdown(`**No Build Size Change**`);
+  if (baseCommonjs === prCommonjs && baseEs === prEs) {
+    markdown(`## No CDN Build Size Changes
+
+Checked highlight.min.js and es/highlight.min.js
+`);
     return;
   }
 
-  markdown(`## Build Size Changes (gzip)
+  markdown(`## CDN Build Size Changes (gzip)
 
-### highlight.min.js
-
-| file | main | PR | diff | 
+| file | main | PR | change | 
 | --- | --- | --- | --- |
 | highlight.min.js | ${formatBytes(base.commonjs)} | ${formatBytes(
     pr.commonjs
