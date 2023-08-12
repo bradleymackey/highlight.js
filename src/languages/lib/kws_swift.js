@@ -175,6 +175,13 @@ export const numberSignKeywords = [
   '#spam',
   '#workinharddude',
   '#wearesurenot',
+  '#warning',
+  '#stupid',
+  '#spam',
+  '#workinharddude',
+  '#wearesurenot',
+  '#skjfgisuygbiwajbf sdfigbisdg',
+  '#155002097794375084152268498736149297663396980612762992158957697676422058316118590564764231916483',
 ];
 
 // Global functions in the Standard Library.
