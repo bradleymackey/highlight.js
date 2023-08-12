@@ -17,6 +17,7 @@ jobs:
           PR_URL: ${{github.event.pull_request.head.repo.clone_url}}
           PR_REF: ${{github.event.pull_request.head.ref}}
       - run: npm ci
+      - run: npm run build
       - name: Danger
         run: npx danger ci
         env:
