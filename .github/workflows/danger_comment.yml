@@ -54,7 +54,9 @@ jobs:
       - name: Danger
         id: danger
         run: |
-          echo "markdown=$(npx danger ci -t)" >> $GITHUB_OUTPUT
+          echo "markdown<<$EOF" >> $GITHUB_OUTPUT
+          npx danger ci -t >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
