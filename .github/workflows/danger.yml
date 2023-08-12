@@ -18,7 +18,6 @@ jobs:
           PR_REF: ${{github.event.pull_request.head.ref}}
           BASE: ${{ github.base_ref }}
       - run: npm ci
-      - run: npm run build-cdn
       - name: Danger
         run: npx danger ci
         env:
