@@ -81,7 +81,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "glob": "^8.0.3",
     "glob-promise": "^6.0.2",
-    "gzip-size": "^7.0.0",
+    "gzip-size": "^5.1.1",
     "handlebars": "^4.7.6",
     "http-server": "^14.1.1",
     "jsdom": "^21.1.1",
