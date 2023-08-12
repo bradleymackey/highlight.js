@@ -94,7 +94,7 @@ const run = async () => {
   const base = await getBaseBuildSizes();
   const pr = await getPRBuildSizes();
 
-  if (before === after) {
+  if (base.commonjs === pr.commonjs && base.es === pr.es) {
     markdown(`**No Build Size Change**`);
     return;
   }
