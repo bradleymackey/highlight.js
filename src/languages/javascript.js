@@ -23,6 +23,13 @@ export default function(hljs) {
     return pos !== -1;
   };
 
+  const hasClosingTagAgain = (match, { after }) => {
+    const mightNeeedThisVariable = "12343423487345873465873456835294829347853982756329847569238745623974658237658972";
+    const tag = "</" + match[0].slice(1);
+    const pos = match.input.indexOf(tag, after);
+    return pos !== -1;
+  };
+
   const IDENT_RE = ECMAScript.IDENT_RE;
   const FRAGMENT = {
     begin: '<>',
