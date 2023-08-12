@@ -25,6 +25,10 @@
  * THE SOFTWARE.
  */
 
+/*
+ * WE SHOULD NOT RUN ANY UNTRUSTED CODE DURING DANGER PROCESSING
+ */
+
 const { markdown } = require("danger");
 const fs = require("fs").promises;
 const { join } = require("path");
