@@ -8,35 +8,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout PR
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.ref }}
-          path: pr
-
-      - name: Build CDN (PR)
-        run: |
-          npm ci
-          npm run build-cdn
-        working-directory: pr
-
       - name: Checkout Base
         uses: actions/checkout@v3
         with:
           ref: ${{ github.base_ref }}
-          path: base
 
       - name: Build CDN (Base)
         run: |
           npm ci
           npm run build-cdn
-        working-directory: base
+          mv build base_build
 
-      - name: Copy Base Build
-        run: cp -R base/build pr/build_base
+      - name: Checkout PR
+        uses: actions/checkout@v3
+        with:
+          clean: false
+
+      - name: Build CDN (PR)
+        run: |
+          npm ci
+          npm run build-cdn
 
       - name: Danger
         run: npx danger ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        working-directory: pr
