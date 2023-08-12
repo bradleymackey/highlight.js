@@ -69,7 +69,7 @@ const formatBytes = (bytes, decimals = 2) => {
 };
 
 const getBaseBuildSizes = async () => {
-  await git.checkoutLocalBranch("main");
+  await git.checkout("main");
   await exec("npm run build-cdn");
   const esFile = await readBaseFile("build/es/highlight.min.js");
   const commonJsFile = await readBaseFile("build/highlight.min.js");
@@ -80,7 +80,7 @@ const getBaseBuildSizes = async () => {
 };
 
 const getPRBuildSizes = async () => {
-  await git.checkoutLocalBranch("pr");
+  await git.checkout("pr");
   await exec("npm run build-cdn");
   const esFile = await readPRFile("build/es/highlight.min.js");
   const commonJsFile = await readPRFile("build/highlight.min.js");
