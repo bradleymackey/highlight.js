@@ -94,12 +94,12 @@ Checked highlight.min.js and es/highlight.min.js
 
 | file | main | PR | change | 
 | --- | --- | --- | --- |
-| highlight.min.js | ${formatBytes(base.commonjs)} | ${formatBytes(
-    pr.commonjs
-  )} | ${formatBytes(pr.commonjs - base.commonjs)}
-| es/highlight.min.js | ${formatBytes(base.es)} | ${formatBytes(
-    pr.es
-  )} | ${formatBytes(pr.es - base.es)}
+| highlight.min.js | ${formatBytes(baseCommonjs)} | ${formatBytes(
+    prCommonjs
+  )} | ${formatBytes(prCommonjs - baseCommonjs)}
+| es/highlight.min.js | ${formatBytes(baseEs)} | ${formatBytes(
+    prEs
+  )} | ${formatBytes(prEs - baseEs)}
 
 `);
 };
