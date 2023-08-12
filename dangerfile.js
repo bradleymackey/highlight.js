@@ -29,6 +29,8 @@ const { markdown } = require("danger");
 const fs = require("fs").promises;
 const gzipSize = require("gzip-size");
 const git = require("simple-git").gitP(__dirname);
+const util = require("util");
+const exec = util.promisify(require("child_process").exec);
 
 /**
  * Returns the contents of a text file in the base of the PR.
@@ -51,30 +53,6 @@ function readPRFile(path) {
   return git.show([`pr:${path}`]);
 }
 
-/**
- * Returns the relative paths of all files changed in the PR.
- *
- * @returns {Promise<string[]>}
- */
-const getChangedFiles = async () => {
-  // Determine the merge base between main and the PR branch.
-  // If files changed in main since PR was branched they would show in the diff otherwise.
-  // https://stackoverflow.com/questions/25071579/list-all-files-changed-in-a-pull-request-in-git-github
-  const mergeBase = (await git.raw(["merge-base", "pr", "HEAD"])).trim();
-  const result = await git.diff([
-    "--name-only",
-    "--no-renames",
-    "pr",
-    mergeBase,
-  ]);
-  return (result || "").trim().split(/\r?\n/g);
-};
-
-const getChangedMinifiedFiles = async () => {
-  const changed = await getChangedFiles();
-  return changed.filter((file) => file.endsWith(".min.js"));
-};
-
 // https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
 const formatBytes = (bytes, decimals = 2) => {
   if (bytes === 0) {
@@ -90,81 +68,50 @@ const formatBytes = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-const maybePlus = (from, to) => (from < to ? "+" : "");
-
-const absDiff = (from, to) => {
-  if (from === to) {
-    return formatBytes(0);
-  }
-
-  return `${maybePlus(from, to)}${formatBytes(to - from)}`;
+const getBaseBuildSizes = async () => {
+  await git.checkoutLocalBranch("main");
+  await exec("npm run build-cdn");
+  const esFile = await readBaseFile("build/es/highlight.min.js");
+  const commonJsFile = await readBaseFile("build/highlight.min.js");
+  return {
+    es: gzipSize(esFile),
+    commonjs: gzipSize(commonJsFile),
+  };
 };
 
-const percDiff = (from, to) => {
-  if (from === to) {
-    return "0%";
-  }
-
-  return `${maybePlus(from, to)}${((100 * (to - from)) / (from || to)).toFixed(
-    1
-  )}%`;
-};
-
-const getSummary = (rows, totalMainFileSize, totalFileSize) => {
-  const numFiles = rows.length;
-  const maybeS = rows.length > 0 ? "s" : "";
-  const byteDiff = absDiff(totalMainFileSize, totalFileSize);
-  const percentDiff = percDiff(totalMainFileSize, totalFileSize);
-
-  return `A total of ${numFiles} file${maybeS} have changed, with a combined diff of ${byteDiff} (${percentDiff}).`;
+const getPRBuildSizes = async () => {
+  await git.checkoutLocalBranch("pr");
+  await exec("npm run build-cdn");
+  const esFile = await readPRFile("build/es/highlight.min.js");
+  const commonJsFile = await readPRFile("build/highlight.min.js");
+  return {
+    es: gzipSize(esFile),
+    commonjs: gzipSize(commonJsFile),
+  };
 };
 
 const run = async () => {
-  const minified = await getChangedMinifiedFiles();
+  const base = await getBaseBuildSizes();
+  const pr = await getPRBuildSizes();
 
-  if (minified.length === 0) {
-    markdown(`## No Existing JS Changes`);
+  if (before === after) {
+    markdown(`**No Build Size Change**`);
     return;
   }
 
-  const rows = [];
-  let totalFileSize = 0;
-  let totalMainFileSize = 0;
+  markdown(`## Build Size Changes (gzip)
 
-  for (const file of minified) {
-    const [fileContents, fileMainContents] = await Promise.all([
-      readPRFile(file).catch(() => ""),
-      readBaseFile(file).catch(() => ""),
-    ]);
+### highlight.min.js
 
-    const [fileSize, fileMainSize] = await Promise.all([
-      gzipSize(fileContents),
-      gzipSize(fileMainContents),
-    ]);
+| main | PR |
+| --- | --- |
+${formatBytes(base.commonjs)} | ${formatBytes(pr.commonjs)}
 
-    totalFileSize += fileSize;
-    totalMainFileSize += fileMainSize;
+### es/highlight.min.js
 
-    rows.push([
-      file,
-      formatBytes(fileMainSize),
-      formatBytes(fileSize),
-      absDiff(fileMainSize, fileSize),
-      percDiff(fileMainSize, fileSize),
-    ]);
-  }
-
-  markdown(`## JS File Size Changes (gzipped)
-
-${getSummary(rows, totalMainFileSize, totalFileSize)}
-
-<details>
-
-| file | main | PR | size diff | % diff |
-| --- | --- | --- | --- | --- |
-${rows.map((row) => `| ${row.join(" | ")} |`).join("\n")}
-
-</details>
+| main | PR |
+| --- | --- |
+${formatBytes(base.es)} | ${formatBytes(pr.es)}
 `);
 };
 
