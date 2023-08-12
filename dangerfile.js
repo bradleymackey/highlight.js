@@ -82,8 +82,8 @@ const getBaseBuildSizes = async () => {
 const getPRBuildSizes = async () => {
   await git.checkout("pr");
   await exec("npm run build-cdn");
-  const esFile = await readPRFile("build/es/highlight.min.js");
-  const commonJsFile = await readPRFile("build/highlight.min.js");
+  const esFile = await readBaseFile("build/es/highlight.min.js");
+  const commonJsFile = await readBaseFile("build/highlight.min.js");
   return {
     es: gzipSize(esFile),
     commonjs: gzipSize(commonJsFile),
