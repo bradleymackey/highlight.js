@@ -14,17 +14,17 @@ jobs:
           ref: ${{ github.ref }}
           path: pr
 
-      - name: Checkout Base
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.base_ref }}
-          path: base
-
       - name: Build CDN (PR)
         run: |
           npm ci
           npm run build-cdn
         working-directory: pr
+
+      - name: Checkout Base
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+          path: base
 
       - name: Build CDN (Base)
         run: |
