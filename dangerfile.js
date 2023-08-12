@@ -43,15 +43,6 @@ const exec = util.promisify(require("child_process").exec);
 function readBaseFile(path) {
   return fs.readFile(path, "utf-8");
 }
-/**
- * Returns the contents of a text file in the pull request branch.
- *
- * @param {string} path
- * @returns {Promise<string>}
- */
-function readPRFile(path) {
-  return git.show([`pr:${path}`]);
-}
 
 // https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
 const formatBytes = (bytes, decimals = 2) => {
@@ -68,19 +59,7 @@ const formatBytes = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-const getBaseBuildSizes = async () => {
-  await git.checkout("base");
-  await exec("npm run build-cdn");
-  const esFile = await readBaseFile("build/es/highlight.min.js");
-  const commonJsFile = await readBaseFile("build/highlight.min.js");
-  return {
-    es: await gzipSize(esFile),
-    commonjs: await gzipSize(commonJsFile),
-  };
-};
-
-const getPRBuildSizes = async () => {
-  await git.checkout("pr");
+const buildAndComputeSize = async () => {
   await exec("npm run build-cdn");
   const esFile = await readBaseFile("build/es/highlight.min.js");
   const commonJsFile = await readBaseFile("build/highlight.min.js");
@@ -91,8 +70,10 @@ const getPRBuildSizes = async () => {
 };
 
 const run = async () => {
-  const base = await getBaseBuildSizes();
-  const pr = await getPRBuildSizes();
+  await git.checkout("base");
+  const base = await buildAndComputeSize();
+  await git.checkout("pr");
+  const pr = await buildAndComputeSize();
 
   if (base.commonjs === pr.commonjs && base.es === pr.es) {
     markdown(`**No Build Size Change**`);
@@ -103,19 +84,15 @@ const run = async () => {
 
 ### highlight.min.js
 
-| main | PR | diff | 
-| --- | --- | --- |
-${formatBytes(base.commonjs)} | ${formatBytes(pr.commonjs)} | ${formatBytes(
-    pr.commonjs - base.commonjs
-  )}
+| file | main | PR | diff | 
+| --- | --- | --- | --- |
+| highlight.min.js | ${formatBytes(base.commonjs)} | ${formatBytes(
+    pr.commonjs
+  )} | ${formatBytes(pr.commonjs - base.commonjs)}
+| es/highlight.min.js | ${formatBytes(base.es)} | ${formatBytes(
+    pr.es
+  )} | ${formatBytes(pr.es - base.es)}
 
-### es/highlight.min.js
-
-| main | PR | diff |
-| --- | --- | --- |
-${formatBytes(base.es)} | ${formatBytes(pr.es)} | ${formatBytes(
-    pr.es - base.es
-  )}
 `);
 };
 
