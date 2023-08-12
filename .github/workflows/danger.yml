@@ -38,7 +38,7 @@ jobs:
         working-directory: ./pr
 
       - name: Copy Base
-        run: cp -R ./base/build ./pr/build_base
+        run: cp -R ./pr/build ./base/build_pr
 
       - name: Danger
         run: npx danger ci

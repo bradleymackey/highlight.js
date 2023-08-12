@@ -30,8 +30,8 @@ const fs = require("fs").promises;
 const { join } = require("path");
 const gzipSize = require("gzip-size");
 
-const PR_BUILD_DIR = "build";
-const BASE_BUILD_DIR = "build_base";
+const PR_BUILD_DIR = "build_pr";
+const BASE_BUILD_DIR = "build";
 
 /**
  * Returns the contents of a text file in the base of the PR.
