@@ -12,10 +12,11 @@ jobs:
         with:
           fetch-depth: 0
       # create a new branch called pr from the remote PR branch
-      - run: git remote add pr_repo $PR_URL && git fetch pr_repo $PR_REF && git branch pr pr_repo/$PR_REF
+      - run: git remote add pr_repo $PR_URL && git fetch pr_repo $PR_REF && git branch pr pr_repo/$PR_REF && git branch base $BASE
         env:
           PR_URL: ${{github.event.pull_request.head.repo.clone_url}}
           PR_REF: ${{github.event.pull_request.head.ref}}
+          BASE: ${{ github.base_ref }}
       - run: npm ci
       - run: npm run build-cdn
       - name: Danger

@@ -69,7 +69,7 @@ const formatBytes = (bytes, decimals = 2) => {
 };
 
 const getBaseBuildSizes = async () => {
-  await git.checkout("main");
+  await git.checkout("base");
   await exec("npm run build-cdn");
   const esFile = await readBaseFile("build/es/highlight.min.js");
   const commonJsFile = await readBaseFile("build/highlight.min.js");
