@@ -123,7 +123,7 @@ const run = async () => {
   const minified = await getChangedMinifiedFiles();
 
   if (minified.length === 0) {
-    markdown(`## No JS Changes`);
+    markdown(`## No Existing JS Changes`);
     return;
   }
 
