@@ -1,0 +1,42 @@
+name: Danger
+
+on:
+  pull_request:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Base
+        uses: actions/checkout@v3
+        with:
+          path: base
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Checkout PR
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pr
+
+      - name: Build CDN (Base)
+        run: |
+          npm ci
+          npm run build-cdn
+        working-directory: ./base
+
+      - name: Build CDN (PR)
+        run: |
+          npm ci
+          npm run build-cdn
+        working-directory: ./pr
+
+      - name: Copy Base
+        run: cp -R ./pr/build ./base/build_pr
+
+      - name: Danger
+        run: npx danger ci
+        env:
+          DANGER_GITHUB_API_TOKEN: ${{ secrets.DANGER_GITHUB_API_TOKEN }}
+        working-directory: ./base
