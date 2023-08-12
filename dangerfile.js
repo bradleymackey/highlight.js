@@ -103,15 +103,19 @@ const run = async () => {
 
 ### highlight.min.js
 
-| main | PR |
-| --- | --- |
-${formatBytes(base.commonjs)} | ${formatBytes(pr.commonjs)}
+| main | PR | diff | 
+| --- | --- | --- |
+${formatBytes(base.commonjs)} | ${formatBytes(pr.commonjs)} | ${formatBytes(
+    pr.commonjs - base.commonjs
+  )}
 
 ### es/highlight.min.js
 
-| main | PR |
-| --- | --- |
-${formatBytes(base.es)} | ${formatBytes(pr.es)}
+| main | PR | diff |
+| --- | --- | --- |
+${formatBytes(base.es)} | ${formatBytes(pr.es)} | ${formatBytes(
+    pr.es - base.es
+  )}
 `);
 };
 
