@@ -28,9 +28,6 @@
 const { markdown } = require("danger");
 const fs = require("fs").promises;
 const gzipSize = require("gzip-size");
-const git = require("simple-git").gitP(__dirname);
-const util = require("util");
-const exec = util.promisify(require("child_process").exec);
 
 /**
  * Returns the contents of a text file in the base of the PR.
@@ -59,10 +56,9 @@ const formatBytes = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-const buildAndComputeSize = async () => {
-  await exec("npm run build-cdn");
-  const esFile = await readBaseFile("build/es/highlight.min.js");
-  const commonJsFile = await readBaseFile("build/highlight.min.js");
+const buildAndComputeSize = async (folder) => {
+  const esFile = await readBaseFile(`${folder}/es/highlight.min.js`);
+  const commonJsFile = await readBaseFile(`${folder}/highlight.min.js`);
   return {
     es: await gzipSize(esFile),
     commonjs: await gzipSize(commonJsFile),
@@ -70,10 +66,8 @@ const buildAndComputeSize = async () => {
 };
 
 const run = async () => {
-  await git.checkout("base");
-  const base = await buildAndComputeSize();
-  await git.checkout("pr");
-  const pr = await buildAndComputeSize();
+  const base = await buildAndComputeSize("build_base");
+  const pr = await buildAndComputeSize("build");
 
   if (base.commonjs === pr.commonjs && base.es === pr.es) {
     markdown(`**No Build Size Change**`);

@@ -8,17 +8,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout PR
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-      # create a new branch called pr from the remote PR branch
-      - run: git remote add pr_repo $PR_URL && git fetch pr_repo $PR_REF && git branch pr pr_repo/$PR_REF && git branch base $BASE
-        env:
-          PR_URL: ${{github.event.pull_request.head.repo.clone_url}}
-          PR_REF: ${{github.event.pull_request.head.ref}}
-          BASE: ${{ github.base_ref }}
-      - run: npm ci
+          path: pr
+
+      - name: Checkout Base
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+          path: base
+
+      - name: Build CDN (PR)
+        run: |
+          npm ci
+          npm run build-cdn
+        working-directory: pr
+
+      - name: Build CDN (Base)
+        run: |
+          npm ci
+          npm run build-cdn
+        working-directory: base
+
+      - name: Copy Base Build
+        run: cp -R base/build pr/build_base
+
       - name: Danger
         run: npx danger ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: pr
