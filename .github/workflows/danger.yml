@@ -11,7 +11,7 @@ jobs:
       - name: Checkout PR
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.ref }}
           path: pr
 
       - name: Checkout Base
