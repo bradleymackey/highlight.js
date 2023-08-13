@@ -54,8 +54,10 @@ jobs:
       - name: Danger
         id: danger
         run: |
+          message=$(npx danger ci -t)
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "markdown<<$EOF" >> $GITHUB_OUTPUT
-          npx danger ci -t >> $GITHUB_OUTPUT
+          echo "$message" >> $GITHUB_OUTPUT
           echo "$EOF" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
