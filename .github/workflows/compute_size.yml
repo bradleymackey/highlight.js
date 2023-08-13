@@ -1,4 +1,4 @@
-name: Build for Danger
+name: Compute Size
 
 on:
   pull_request:
@@ -37,12 +37,11 @@ jobs:
           npm run build-cdn
         working-directory: ./pr
 
-      - name: Create Builds Folder
+      - name: Create Size Report Folder
         run: |
-          mkdir builds
-          mv base/build builds/base
-          mv pr/build builds/pr
-          echo ${{ github.event.number }} > builds/pull_req_nr
+          mkdir size_report
+          echo ${{ github.event.number }} > size_report/pull_req_nr
+          echo "# hello world" > size_report/report.md
 
       - name: Save Build Arifacts
         uses: actions/upload-artifact@v3

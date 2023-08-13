@@ -1,10 +1,8 @@
-name: Danger Comment
+name: Comment Size
 
-# read-write repo token
-# access to secrets
 on:
   workflow_run:
-    workflows: ["Build for Danger"]
+    workflows: ["Compute Size"]
     types:
       - completed
 
@@ -15,19 +13,6 @@ jobs:
       github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success'
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
-      - name: Checkout Base
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.workflow_run.base_ref }}
-
-      - name: Build
-        run: npm ci
-
       - name: "Download artifact"
         uses: actions/github-script@v3.1.0
         with:
@@ -38,7 +23,7 @@ jobs:
                run_id: ${{github.event.workflow_run.id }},
             });
             var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "builds"
+              return artifact.name == "size_report"
             })[0];
             var download = await github.actions.downloadArtifact({
                owner: context.repo.owner,
@@ -47,20 +32,9 @@ jobs:
                archive_format: 'zip',
             });
             var fs = require('fs');
-            fs.writeFileSync('${{github.workspace}}/builds.zip', Buffer.from(download.data));
+            fs.writeFileSync('${{github.workspace}}/size_report.zip', Buffer.from(download.data));
 
-      - run: unzip -d builds builds.zip
-
-      - name: Danger
-        id: danger
-        run: |
-          message=$(npx danger ci -t)
-          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          echo "markdown<<$EOF" >> $GITHUB_OUTPUT
-          echo "$message" >> $GITHUB_OUTPUT
-          echo "$EOF" >> $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: unzip -d size_report size_report.zip
 
       - name: "Comment on PR"
         uses: actions/github-script@v3
@@ -68,10 +42,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             var fs = require('fs');
-            var issue_number = Number(fs.readFileSync('./builds/pull_req_nr'));
+            var issue_number = Number(fs.readFileSync('./size_report/pull_req_nr'));
+            var size_report = fs.readFileSync('./size_report/report.md');
             await github.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
-              body: ${{ steps.danger.output.markdown }}
+              body: size_report
             });
