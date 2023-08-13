@@ -79,7 +79,7 @@ async function run() {
     const maybeS = removedFiles.length === 1 ? "" : "s";
     md += `## ${removedFiles.length} Removed File${maybeS}\n\n`;
     md += "| file | size |\n";
-    for (const file of addedFiles) {
+    for (const file of removedFiles) {
       const computedSize = computedFile(base, file);
       md += `| ${file} | -${computedSize}B |\n`;
     }
@@ -87,8 +87,8 @@ async function run() {
   }
 
   let fileSizeChanges = 0;
-  let sizeChangeMd = "## Changed Files\n";
-  sizeChangeMd += "| file | base | pr | diff |\n";
+  md += "## Changed Files\n";
+  let sizeChangeMd = "| file | base | pr | diff |\n";
   sizeChangeMd += "| --- | --- | --- | --- |\n";
   for (const file of changedFiles) {
     const computedBase = computedFile(base, file);
