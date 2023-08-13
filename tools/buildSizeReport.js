@@ -68,6 +68,7 @@ async function run() {
     const maybeS = addedFiles.length === 1 ? "" : "s";
     md += `## ${addedFiles.length} Added File${maybeS}\n\n`;
     md += "<details>\n";
+    md += "<summary>View Changes</summary>\n\n";
     md += "| file | size |\n";
     for (const file of addedFiles) {
       const computedSize = computedFile(pr, file);
@@ -81,6 +82,7 @@ async function run() {
     const maybeS = removedFiles.length === 1 ? "" : "s";
     md += `## ${removedFiles.length} Removed File${maybeS}\n\n`;
     md += "<details>\n";
+    md += "<summary>View Changes</summary>\n\n";
     md += "| file | size |\n";
     for (const file of removedFiles) {
       const computedSize = computedFile(base, file);
@@ -92,7 +94,6 @@ async function run() {
 
   let fileSizeChanges = 0;
   let combinedChangeSize = 0;
-  md += "## Changed Files\n\n";
   let sizeChangeMd = "| file | base | pr | diff |\n";
   sizeChangeMd += "| --- | --- | --- | --- |\n";
   for (const file of changedFiles) {
@@ -102,22 +103,25 @@ async function run() {
     if (diff !== 0) {
       combinedChangeSize += diff;
       fileSizeChanges += 1;
-      const sign = diff >= 0 ? "+" : "-";
+      const sign = diff >= 0 ? "+" : "";
       sizeChangeMd += `| ${file} | ${computedBase}B | ${computedPR}B | ${sign}${diff}B |\n`;
     }
-    sizeChangeMd += "\n";
   }
 
   if (fileSizeChanges > 0) {
     const maybeS = fileSizeChanges === 1 ? "" : "s";
-    const sign = combinedChangeSize >= 0 ? "+" : "-";
-    md += `${fileSizeChanges} file${maybeS} changed, totalling ${sign}${combinedChangeSize}B\n`;
+    const sign = combinedChangeSize >= 0 ? "+" : "";
+    md += `## ${fileSizeChanges} file${maybeS} changed\n`;
+    md += `Totalling ${sign}${combinedChangeSize}B\n\n`;
     md += "<details>\n";
+    md += "<summary>View Changes</summary>\n\n";
     md += sizeChangeMd;
+    md += "\n";
     md += "</details>\n";
     md += "\n";
   } else {
-    md += "No existing build file changes.";
+    md += "## No changes\n";
+    md += "No existing build file changes.\n";
   }
 
   return md;
