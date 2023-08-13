@@ -25,7 +25,7 @@ function run() {
   const [base, pr] = process.argv.slice(2);
   const files = ["highlight.min.js", "es/highlight.min.js"];
 
-  let md = "# CDN Size Report\n";
+  let md = "# Build Size Report (gzip)\n\n";
   md += "| file | base | pr | diff |\n";
   md += "| --- | --- | --- | --- |\n";
   for (const file of files) {
