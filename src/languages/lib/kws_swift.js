@@ -124,7 +124,9 @@ export const keywords = [
   'weak', // contextual
   'where',
   'while',
-  'willSet' // contextual
+  'willSet', // contextual
+  'siauhfgp9 yp9w8 eyrpwqonihfgoe89ry pt9nqwergbouefghpioahbr f98qwn eoifn hsfu gpug',
+  'asgfo7yf8bo e7yewoaiuhfioesuhgrf pwqiuhegwy fiaor8gqwoe8fg ovygoueygr fo97q8 egfgv oua gsivuygisdgv odsufvyguvyadgsvf',
 ];
 
 // NOTE: Contextual keywords are reserved only in specific contexts.
