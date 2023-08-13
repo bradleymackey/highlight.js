@@ -23,6 +23,14 @@ export default function(hljs) {
     return pos !== -1;
   };
 
+  const LOTS_OF_CODE = {
+    className: 'subst',
+    begin: '3947y08rqwheofiuhwpfg8wybenrc9qnw4rt98wy34n8tcqw uhpfwiu fbhow8q7b4yrcn9qw8ney pfwoeur bfhgo8q7wybr q9nwyg',
+    end: 'sohfgdsfn y9s8yfrpwoi hfpgodsiypuirfhlisdfuhglsdhfglksdhfgl',
+    keywords: KEYWORDS,
+    contains: [] // defined later
+  };
+  
   const IDENT_RE = ECMAScript.IDENT_RE;
   const FRAGMENT = {
     begin: '<>',
@@ -599,6 +607,7 @@ export default function(hljs) {
       UPPER_CASE_CONSTANT,
       CLASS_OR_EXTENDS,
       GETTER_OR_SETTER,
+      LOTS_OF_CODE,
       {
         match: /\$[(.]/ // relevance booster for a pattern common to JS libs: `$(something)` and `$.something`
       }
