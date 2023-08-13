@@ -8,6 +8,7 @@
 const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
+const glob = require("glob");
 
 /**
  * The size, in bytes of the given file after gzip.
@@ -18,25 +19,95 @@ function computedFile(dir, filePath) {
   return zlib.gzipSync(str).length;
 }
 
+async function minifiedFiles(dir) {
+  return await new Promise((res, rej) => {
+    glob(dir + "/**/*.min.js", {}, (err, files) => {
+      if (err) {
+        rej(err);
+      } else {
+        res(files.map((f) => f.replace(dir + "/", "")));
+      }
+    });
+  });
+}
+
 /**
- * Returns mardown report of size differences.
+ * Returns markdown report of size differences.
  */
-function run() {
+async function run() {
   const [base, pr] = process.argv.slice(2);
-  const files = ["highlight.min.js", "es/highlight.min.js"];
+  const baseFiles = await minifiedFiles(base);
+  const prFiles = await minifiedFiles(pr);
+
+  const baseFilesSet = new Set(baseFiles);
+  const prFilesSet = new Set(prFiles);
+
+  let addedFiles = [];
+  for (const file of prFiles) {
+    if (!baseFilesSet.has(file)) {
+      addedFiles.push(file);
+    }
+  }
+
+  let changedFiles = [];
+  let removedFiles = [];
+  for (const file of baseFiles) {
+    if (prFilesSet.has(file)) {
+      changedFiles.push(file);
+    } else {
+      removedFiles.push(file);
+    }
+  }
 
   let md = "# Build Size Report (gzip)\n\n";
-  md += "| file | base | pr | diff |\n";
-  md += "| --- | --- | --- | --- |\n";
-  for (const file of files) {
+
+  if (addedFiles.length > 0) {
+    const maybeS = addedFiles.length === 1 ? "" : "s";
+    md += `## ${addedFiles.length} Added File${maybeS}\n\n`;
+    md += "| file | size |\n";
+    for (const file of addedFiles) {
+      const computedSize = computedFile(pr, file);
+      md += `| ${file} | +${computedSize}B |\n`;
+    }
+    md += "\n";
+  }
+
+  if (removedFiles.length > 0) {
+    const maybeS = removedFiles.length === 1 ? "" : "s";
+    md += `## ${removedFiles.length} Removed File${maybeS}\n\n`;
+    md += "| file | size |\n";
+    for (const file of addedFiles) {
+      const computedSize = computedFile(base, file);
+      md += `| ${file} | -${computedSize}B |\n`;
+    }
+    md += "\n";
+  }
+
+  let fileSizeChanges = 0;
+  let sizeChangeMd = "## Changed Files\n";
+  sizeChangeMd += "| file | base | pr | diff |\n";
+  sizeChangeMd += "| --- | --- | --- | --- |\n";
+  for (const file of changedFiles) {
     const computedBase = computedFile(base, file);
     const computedPR = computedFile(pr, file);
     const diff = computedPR - computedBase;
-    const sign = diff >= 0 ? "+" : "-";
-    md += `| ${file} | ${computedBase}B | ${computedPR}B | ${sign}${diff}B\n |`;
+    if (diff !== 0) {
+      fileSizeChanges += 1;
+      const sign = diff >= 0 ? "+" : "-";
+      sizeChangeMd += `| ${file} | ${computedBase}B | ${computedPR}B | ${sign}${diff}B |\n`;
+    }
+  }
+
+  if (fileSizeChanges > 0) {
+    md += sizeChangeMd;
+    md += "\n";
+  } else {
+    md += "No build file size changes!";
   }
 
   return md;
 }
 
-console.log(run());
+(async () => {
+  console.log(await run());
+})();
