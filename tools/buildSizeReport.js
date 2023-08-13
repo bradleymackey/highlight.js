@@ -10,6 +10,20 @@ const path = require("path");
 const zlib = require("zlib");
 const glob = require("glob");
 
+function formatBytes(bytes, decimals = 2) {
+  if (bytes === 0) {
+    return "0 B";
+  }
+
+  const k = 1000;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+  const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+}
+
 /**
  * The size, in bytes, of the given file after gzip.
  */
@@ -72,7 +86,7 @@ async function run() {
     md += "| file | size |\n";
     for (const file of addedFiles) {
       const computedSize = computedFile(pr, file);
-      md += `| ${file} | +${computedSize}B |\n`;
+      md += `| ${file} | +${formatBytes(computedSize)} |\n`;
     }
     md += "</details>\n";
     md += "\n";
@@ -86,7 +100,7 @@ async function run() {
     md += "| file | size |\n";
     for (const file of removedFiles) {
       const computedSize = computedFile(base, file);
-      md += `| ${file} | -${computedSize}B |\n`;
+      md += `| ${file} | -${formatBytes(computedSize)} |\n`;
     }
     md += "</details>\n";
     md += "\n";
@@ -104,7 +118,9 @@ async function run() {
       combinedChangeSize += diff;
       fileSizeChanges += 1;
       const sign = diff >= 0 ? "+" : "";
-      sizeChangeMd += `| ${file} | ${computedBase}B | ${computedPR}B | ${sign}${diff}B |\n`;
+      sizeChangeMd += `| ${file} | ${formatBytes(computedBase)} | ${formatBytes(
+        computedPR
+      )} | ${sign}${formatBytes(diff)} |\n`;
     }
   }
 
@@ -112,7 +128,7 @@ async function run() {
     const maybeS = fileSizeChanges === 1 ? "" : "s";
     const sign = combinedChangeSize >= 0 ? "+" : "";
     md += `## ${fileSizeChanges} file${maybeS} changed\n`;
-    md += `Totalling ${sign}${combinedChangeSize}B\n\n`;
+    md += `Totalling ${sign}${formatBytes(combinedChangeSize)}\n\n`;
     md += "<details>\n";
     md += "<summary>View Changes</summary>\n\n";
     md += sizeChangeMd;
