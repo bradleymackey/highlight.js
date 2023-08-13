@@ -41,7 +41,8 @@ jobs:
         run: |
           mkdir size_report
           echo ${{ github.event.number }} > size_report/pull_req_nr
-          echo "# hello world" > size_report/report.md
+          REPORT=$(./base/tools/buildSizeReport.js ./base/build ./pr/build)
+          echo "$REPORT" > size_report/report.md
 
       - name: Save Size Report
         uses: actions/upload-artifact@v3
