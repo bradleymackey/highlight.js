@@ -43,7 +43,7 @@ jobs:
           script: |
             var fs = require('fs');
             var issue_number = Number(fs.readFileSync('./size_report/pull_req_nr'));
-            var size_report = fs.readFileSync('./size_report/report.md');
+            var size_report = String(fs.readFileSync('./size_report/report.md'));
             await github.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
