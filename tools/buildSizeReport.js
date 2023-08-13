@@ -88,6 +88,7 @@ async function run() {
       const computedSize = computedFile(pr, file);
       md += `| ${file} | +${formatBytes(computedSize)} |\n`;
     }
+    md += "\n";
     md += "</details>\n";
     md += "\n";
   }
@@ -102,6 +103,7 @@ async function run() {
       const computedSize = computedFile(base, file);
       md += `| ${file} | -${formatBytes(computedSize)} |\n`;
     }
+    md += "\n";
     md += "</details>\n";
     md += "\n";
   }
