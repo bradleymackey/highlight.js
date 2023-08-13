@@ -33,7 +33,7 @@ function run() {
     const computedPR = computedFile(pr, file);
     const diff = computedPR - computedBase;
     const sign = diff >= 0 ? "+" : "-";
-    md += `| ${file} | ${computedBase}B | ${computedPR}B | ${sign}${diff}B\n`;
+    md += `| ${file} | ${computedBase}B | ${computedPR}B | ${sign}${diff}B\n |`;
   }
 
   return md;
