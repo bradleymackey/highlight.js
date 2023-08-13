@@ -43,8 +43,8 @@ jobs:
           echo ${{ github.event.number }} > size_report/pull_req_nr
           echo "# hello world" > size_report/report.md
 
-      - name: Save Build Arifacts
+      - name: Save Size Report
         uses: actions/upload-artifact@v3
         with:
-          name: builds
-          path: ./builds
+          name: size_report
+          path: ./size_report
