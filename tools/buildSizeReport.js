@@ -11,7 +11,7 @@ const zlib = require("zlib");
 const glob = require("glob");
 
 /**
- * The size, in bytes of the given file after gzip.
+ * The size, in bytes, of the given file after gzip.
  */
 function computedFile(dir, filePath) {
   const pathToFile = path.join(dir, filePath);
@@ -19,6 +19,9 @@ function computedFile(dir, filePath) {
   return zlib.gzipSync(str).length;
 }
 
+/**
+ * Returns list of minified files in the given directory.
+ */
 async function minifiedFiles(dir) {
   return await new Promise((res, rej) => {
     glob(dir + "/**/*.min.js", {}, (err, files) => {
@@ -102,7 +105,7 @@ async function run() {
     md += sizeChangeMd;
     md += "\n";
   } else {
-    md += "No build file size changes!";
+    md += "No existing build file changes.";
   }
 
   return md;
