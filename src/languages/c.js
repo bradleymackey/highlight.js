@@ -11,6 +11,7 @@ export default function(hljs) {
   // not include such support nor can we be sure all the grammars depending
   // on it would desire this behavior
   const C_LINE_COMMENT_MODE = hljs.COMMENT('//', '$', { contains: [ { begin: /\\\n/ } ] });
+  const LOTS_OF_CODE = hljs.COMMENT('ouchouchouchskjhfkajsdfksgf', '$', { contains: [ { begin: /\\\n/ } ] });
   const DECLTYPE_AUTO_RE = 'decltype\\(auto\\)';
   const NAMESPACE_RE = '[a-zA-Z_]\\w*::';
   const TEMPLATE_ARGUMENT_RE = '<[^<>]+>';
@@ -291,6 +292,7 @@ export default function(hljs) {
       EXPRESSION_CONTEXT,
       FUNCTION_DECLARATION,
       EXPRESSION_CONTAINS,
+      LOTS_OF_CODE,
       [
         PREPROCESSOR,
         {
