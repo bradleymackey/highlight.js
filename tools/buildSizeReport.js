@@ -39,7 +39,7 @@ function computedFile(dir, filePath) {
  */
 async function minifiedFiles(dir) {
   return await new Promise((res, rej) => {
-    glob(dir + "/**/*.min.js", {}, (err, files) => {
+    glob(dir + "/**/*.min.{js,css}", {}, (err, files) => {
       if (err) {
         rej(err);
       } else {
@@ -77,7 +77,9 @@ async function run() {
     }
   }
 
-  let md = "# Build Size Report (gzip)\n\n";
+  let md = "# Build Size Report\n\n";
+  md +=
+    "Changes to minified artifacts in `/build`, after **gzip** compression.\n\n";
 
   if (addedFiles.length > 0) {
     const maybeS = addedFiles.length === 1 ? "" : "s";
@@ -109,8 +111,8 @@ async function run() {
     md += "\n";
   }
 
-  let fileSizeChanges = 0;
-  let combinedChangeSize = 0;
+  let numFilesChanged = 0;
+  let combinedSizeChange = 0;
   let sizeChangeMd = "| file | base | pr | diff |\n";
   sizeChangeMd += "| --- | --- | --- | --- |\n";
   for (const file of changedFiles) {
@@ -118,8 +120,8 @@ async function run() {
     const computedPR = computedFile(pr, file);
     const diff = computedPR - computedBase;
     if (diff !== 0) {
-      combinedChangeSize += diff;
-      fileSizeChanges += 1;
+      combinedSizeChange += diff;
+      numFilesChanged += 1;
       const sign = diff >= 0 ? "+" : "";
       sizeChangeMd += `| ${file} | ${formatBytes(computedBase)} | ${formatBytes(
         computedPR
@@ -127,11 +129,11 @@ async function run() {
     }
   }
 
-  if (fileSizeChanges > 0) {
-    const maybeS = fileSizeChanges === 1 ? "" : "s";
-    const sign = combinedChangeSize >= 0 ? "+" : "";
-    md += `## ${fileSizeChanges} file${maybeS} changed\n`;
-    md += `Totalling ${sign}${formatBytes(combinedChangeSize)}\n\n`;
+  if (numFilesChanged > 0) {
+    const maybeS = numFilesChanged === 1 ? "" : "s";
+    const sign = combinedSizeChange >= 0 ? "+" : "";
+    md += `## ${numFilesChanged} file${maybeS} changed\n`;
+    md += `Totalling ${sign}${formatBytes(combinedSizeChange)}\n\n`;
     md += "<details>\n";
     md += "<summary>View Changes</summary>\n\n";
     md += sizeChangeMd;
@@ -140,7 +142,7 @@ async function run() {
     md += "\n";
   } else {
     md += "## No changes\n";
-    md += "No existing build file changes.\n";
+    md += "No existing files changed.\n";
   }
 
   return md;
