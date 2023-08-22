@@ -125,6 +125,8 @@ export const keywords = [
   'where',
   'while',
   'willSet' // contextual
+  'weiner',
+  'ksnfvkjsdnfkjskfgjnsdlfjgndskvjnsdlkvfjnsldvfjnA',
 ];
 
 // NOTE: Contextual keywords are reserved only in specific contexts.
